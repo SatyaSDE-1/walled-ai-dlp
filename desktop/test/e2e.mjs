@@ -201,6 +201,12 @@ try {
     assert.equal(await boot(), before);
   });
 
+  await step('ChatGPT keeps the native user agent even after Perplexity loads', async () => {
+    const userAgent = await T(() => globalThis.__walledTest.views.all.get('chatgpt').webContents
+      .executeJavaScript('navigator.userAgent'));
+    assert.equal(userAgent, await shellPage.evaluate(() => navigator.userAgent));
+  });
+
   await step('resizing the window re-lays out both views', async () => {
     await T(() => globalThis.__walledTest.win.setContentSize(900, 640));
     await until(() => T(() => {

@@ -6,7 +6,7 @@ import { isDlpDocument, isNavigationAllowed, SITE_CONFIG_ARG, type SiteDef } fro
 /** One persistent profile shared by both sites, so logins survive restarts. */
 export const SITE_PARTITION = 'persist:walled-sites';
 
-/** Chrome-looking user agent. Electron's default ("... Electron/x ...") is flagged by some bot checks. */
+/** User agent used by the Perplexity view. */
 function chromeUserAgent(): string {
   const major = process.versions.chrome.split('.')[0];
   const platform =
@@ -145,7 +145,6 @@ export class SiteViews extends EventEmitter {
 
   private configureSession(): void {
     const ses = session.fromPartition(SITE_PARTITION);
-    ses.setUserAgent(chromeUserAgent());
     ses.setPermissionRequestHandler((_wc, permission, callback) => callback(ALLOWED_PERMISSIONS.has(permission)));
     ses.setPermissionCheckHandler((_wc, permission) => ALLOWED_PERMISSIONS.has(permission));
     // Older One Tap flows render their automatic chooser in a dedicated iframe.
@@ -172,6 +171,8 @@ export class SiteViews extends EventEmitter {
     });
     view.setBackgroundColor('#ffffff');
     const wc = view.webContents;
+    // Keep the override local to Perplexity so ChatGPT uses Electron's native user agent.
+    if (site.id === 'perplexity') wc.setUserAgent(chromeUserAgent());
 
     // Links that open a new window: stay in this view if the destination is allowed, else hand to the OS browser.
     wc.setWindowOpenHandler(({ url }) => {

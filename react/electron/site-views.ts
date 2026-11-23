@@ -239,7 +239,8 @@ export class SiteViews extends EventEmitter {
 
   private createTab(site: SiteDef): SiteTab {
     const profile = session.fromPartition(SITE_PARTITIONS[site.id]);
-    profile.setUserAgent(chromeUserAgent());
+    // Let ChatGPT's browser verification see Electron's native user agent.
+    if (site.id === 'perplexity') profile.setUserAgent(chromeUserAgent());
     profile.setPermissionRequestHandler((_contents, permission, reply) => reply(permission === 'clipboard-sanitized-write'));
     profile.setPermissionCheckHandler((_contents, permission) => permission === 'clipboard-sanitized-write');
     // Older versions of One Tap open the automatic chooser in a dedicated iframe.
